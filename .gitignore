@@ -2,3 +2,5 @@
 .clj-kondo
 .cpcache
 .lsp
+
+test-proj
