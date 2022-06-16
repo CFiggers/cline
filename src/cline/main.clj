@@ -17,12 +17,6 @@
 (defn print-version [{:keys [opts]}]
   (println "cline" version))
 
-(defn print-help [{:keys [opts]}]
-  (println (str/triml (str
-"cline cli version " version "
-
-This help prompt under construction."))))
-
 (defn print-license-help [{:keys [opts]}]
   (println (str/triml (str
 "cline cli version " version "
@@ -157,18 +151,36 @@ This help prompt specific to the \"license\" subcommand is under construction.")
                   " project called "
                   (:project-name opts) "."))))
 
+(declare print-help)
+
+(def cmds-vec
+  [{:cmds ["new"] :help-text "Sets up a new default project." 
+    :fn new-project :cmds-opts [:project-name]}
+   {:cmds ["check-args"] :help-text "Returns the `opts` map for debugging."
+    :fn identity :cmds-opts [:project-name]}
+   {:cmds ["license" "list"] :help-text "Lists available licenses."
+    :fn license-search :cmds-opts [:search-term]}
+   {:cmds ["license" "search"] :help-text "Search available licenses."
+    :fn license-search :cmds-opts [:search-term]}
+   {:cmds ["license" "add"] :help-text "Add a license to LICENSE."
+    :fn license-add :cmds-opts [:license]}
+   {:cmds ["license"] :help-text "Prints license help."
+    :fn print-license-help}])
+
+(defn print-help [{:keys [opts]}]
+  (println (str/triml (str
+"cline cli version " version "
+
+This help prompt under construction."))))
+
 (defn -main [& _args]
   (cli/dispatch
-   [{:cmds ["new"] :fn new-project :cmds-opts [:project-name]}
-    {:cmds ["check-args"] :fn identity :cmds-opts [:project-name]}
-    {:cmds ["license" "list"] :fn license-search :cmds-opts [:search-term]}
-    {:cmds ["license" "search"]  :fn license-search :cmds-opts [:search-term]}
-    {:cmds ["license" "add"] :fn license-add :cmds-opts [:license]}
-    {:cmds ["license"] :fn print-license-help}
-    {:cmds [] :fn (fn [{:keys [opts] :as m}]
-                    (if (:version opts)
-                      (print-version m)
-                      (print-help m)))}]
+   (conj cmds-vec
+         {:cmds []
+          :fn (fn [{:keys [opts] :as m}]
+                (if (:version opts)
+                  (print-version m)
+                  (print-help m)))})
    *command-line-args*
    {:coerce {:deps-deploy parse-boolean
              :as symbol
