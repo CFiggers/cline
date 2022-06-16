@@ -5,7 +5,7 @@
          '[clojure.string :as str]
          '[babashka.curl :as curl]
          '[cheshire.core :as cheshire]
-         '[babashka.process :refer [sh process]])
+         '[babashka.process :refer [process]])
 
 (import java.net.URLEncoder)
 (import java.time.YearMonth)
@@ -138,12 +138,24 @@ This help prompt specific to the \"license\" subcommand is under construction.")
                               (str (.getYear (.now YearMonth)) " " git-name))]
     (spit target out-file)))
 
+(def gitignore-template
+".calva
+.clj-kondo
+.cpcache
+.lsp")
+
+(defn gitignore-add [{:keys [opts]}]
+  (let [proj-path (:project-name opts)
+        target (str (fs/path proj-path ".gitignore"))]
+    (spit target gitignore-template)))
+
 (defn new-project [opts]
   (ensure-project-folder opts)
   (ensure-deps-file opts)
   (ensure-src-namespace opts)
   (ensure-main opts)
   (license-add opts)
+  (gitignore-add opts)
   (when git-name (license-update opts))
   (let [opts (:opts opts)]
     (println (str "Generating a "
