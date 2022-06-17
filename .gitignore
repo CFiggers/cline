@@ -2,5 +2,7 @@
 .clj-kondo
 .cpcache
 .lsp
+.nrepl-port
 
 test-proj
+out
