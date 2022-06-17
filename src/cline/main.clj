@@ -10,7 +10,7 @@
 (import java.net.URLEncoder)
 (import java.time.YearMonth)
 
-(def version "v0.0.1")
+(def version "v0.0.2")
 
 (def git-name (-> (process '[git config user.name]) :out slurp str/trim-newline))
 
@@ -46,15 +46,17 @@ This help prompt specific to the \"license\" subcommand is under construction.")
    "clojuredart" "ClojureDart"})
 
 (defn ensure-main [{:keys [opts]}]
-  (let [proj-path (:project-name opts)
+  (let [proj-name (:project-name opts)
+        proj-path (str/replace proj-name "-" "_")
         extension (extensions (str/lower-case (:type opts)))
-        target (str (fs/path proj-path "src" proj-path (str "main" extension)))]
+        target (str (fs/path proj-name "src" proj-path (str "main" extension)))]
     (when-not (fs/exists? target)
-      (spit target (str "(ns " proj-path ".main)")))))
+      (spit target (str "(ns " proj-name ".main)")))))
 
 (defn ensure-src-namespace [{:keys [opts]}]
-  (let [proj-path (:project-name opts)
-        target (str (fs/path proj-path "src" proj-path))]
+  (let [proj-name (:project-name opts)
+        proj-path (str/replace proj-name "-" "_")
+        target (str (fs/path proj-name "src" proj-path))]
     (when-not (fs/exists? target)
       (fs/create-dirs target))))
 
